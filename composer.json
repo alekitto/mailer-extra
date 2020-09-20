@@ -1,0 +1,36 @@
+{
+    "name": "kcs/mailer-extra",
+    "description": "Extra utilities for symfony mailer",
+    "type": "library",
+    "require": {
+        "php": "^7.4",
+        "symfony/mailer": "^4.4|^5.0"
+    },
+    "require-dev": {
+        "ext-json": "*",
+        "aws/aws-sdk-php": "^3.0",
+        "symfony/http-client": "^4.4|^5.0",
+        "symfony/twig-bridge": "^4.4|^5.0",
+        "symfony/process": "^4.4|^5.0",
+        "phpspec/prophecy-phpunit": "^2.0",
+        "phpunit/phpunit": "^9.0",
+        "psr/http-factory": "^1.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alessandro Chitolina",
+            "email": "alekitto@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Kcs\\MailerExtra\\": "lib/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Kcs\\MailerExtra\\": "tests/"
+        }
+    }
+}
