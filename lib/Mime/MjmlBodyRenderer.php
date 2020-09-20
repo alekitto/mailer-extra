@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Kcs\MailerExtra\Mime;
 
@@ -8,6 +10,11 @@ use Symfony\Component\Mime\BodyRendererInterface;
 use Symfony\Component\Mime\Exception\InvalidArgumentException;
 use Symfony\Component\Mime\Message;
 use Twig\Environment;
+use function array_merge;
+use function assert;
+use function get_class;
+use function Safe\sprintf;
+use function trim;
 
 class MjmlBodyRenderer implements BodyRendererInterface
 {
@@ -24,13 +31,16 @@ class MjmlBodyRenderer implements BodyRendererInterface
 
     public function render(Message $message): void
     {
-        if ($message instanceof MjmlEmail && ($template = $message->getMjmlTemplate())) {
+        $template = $message instanceof MjmlEmail ? $message->getMjmlTemplate() : null;
+        if (! empty($template)) {
+            assert($message instanceof MjmlEmail);
+
             $messageContext = $message->getContext();
             if (isset($messageContext['email'])) {
-                throw new InvalidArgumentException(\sprintf('A "%s" context cannot have an "email" entry as this is a reserved variable.', \get_class($message)));
+                throw new InvalidArgumentException(sprintf('A "%s" context cannot have an "email" entry as this is a reserved variable.', get_class($message)));
             }
 
-            $vars = \array_merge($messageContext, [
+            $vars = array_merge($messageContext, [
                 'email' => new WrappedTemplatedEmail($this->twig, $message),
             ]);
 
@@ -39,13 +49,12 @@ class MjmlBodyRenderer implements BodyRendererInterface
 
             if ($twigTemplate->hasBlock('title', $vars)) {
                 $title = $twigTemplate->renderBlock('title', $vars);
-                $message->subject(\trim($title));
+                $message->subject(trim($title));
             }
 
             $message
                 ->html($html)
-                ->htmlTemplate(null)
-            ;
+                ->htmlTemplate(null);
         }
 
         $this->bodyRenderer->render($message);

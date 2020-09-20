@@ -1,8 +1,20 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Kcs\MailerExtra\Mjml;
 
 use Aws\Lambda\LambdaClient;
+use RuntimeException;
+use function count;
+use function Safe\dns_get_record;
+use function Safe\json_decode;
+use function Safe\json_encode;
+use function Safe\parse_url;
+use function Safe\preg_match;
+use function strlen;
+use const DNS_TXT;
+use const JSON_THROW_ON_ERROR;
 
 class LambdaHttpRenderer implements RendererInterface
 {
@@ -19,12 +31,12 @@ class LambdaHttpRenderer implements RendererInterface
 
     public function render(string $markup): string
     {
-        if (\preg_match('#^txt\+lambda://#', $this->functionArn)) {
-            $url = \parse_url($this->functionArn);
+        if (preg_match('#^txt\+lambda://#', $this->functionArn)) {
+            $url = parse_url($this->functionArn);
             $host = $url['host'];
 
-            $record = \dns_get_record($host, DNS_TXT);
-            if (false !== $record && 0 !== \count($record)) {
+            $record = dns_get_record($host, DNS_TXT);
+            if ($record !== false && count($record) !== 0) {
                 $host = $record[0]['txt'];
             }
 
@@ -34,10 +46,10 @@ class LambdaHttpRenderer implements RendererInterface
 
         $response = $this->client->invoke([
             'FunctionName' => $this->functionArn,
-            'Payload' => \json_encode([
+            'Payload' => json_encode([
                 'headers' => [
                     'content-type' => 'text/mjml',
-                    'content-length' => \strlen($markup),
+                    'content-length' => strlen($markup),
                     'X-Forwarded-Port' => 443,
                     'X-Forwarded-Proto' => 'https',
                 ],
@@ -52,10 +64,10 @@ class LambdaHttpRenderer implements RendererInterface
             ], JSON_THROW_ON_ERROR),
         ]);
 
-        $payload = \json_decode((string) $response['Payload'], true, 512, JSON_THROW_ON_ERROR);
+        $payload = json_decode((string) $response['Payload'], true, 512, JSON_THROW_ON_ERROR);
         $statusCode = $payload['statusCode'];
-        if (200 !== $statusCode) {
-            throw new \RuntimeException('Response not OK');
+        if ($statusCode !== 200) {
+            throw new RuntimeException('Response not OK');
         }
 
         return $payload['body'];

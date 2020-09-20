@@ -9,12 +9,25 @@
     "require-dev": {
         "ext-json": "*",
         "aws/aws-sdk-php": "^3.0",
+        "roave/security-advisories": "dev-master",
+        "solido/php-coding-standards": "dev-master",
+        "symfony/config": "^4.4|^5.0",
+        "symfony/dependency-injection": "^4.4|^5.0",
         "symfony/http-client": "^4.4|^5.0",
+        "symfony/http-kernel": "^4.4|^5.0",
         "symfony/twig-bridge": "^4.4|^5.0",
         "symfony/process": "^4.4|^5.0",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "^9.0",
         "psr/http-factory": "^1.0"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "scripts": {
+        "phpstan": "phpstan analyse lib/ -c vendor/solido/php-coding-standards/phpstan.neon --level=8 --no-progress -vvv --memory-limit=2048M",
+        "cscheck": "vendor/bin/phpcs --standard=Solido lib/",
+        "csfix": "vendor/bin/phpcbf --standard=Solido lib/"
     },
     "license": "MIT",
     "authors": [

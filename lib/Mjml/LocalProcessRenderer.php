@@ -1,8 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Kcs\MailerExtra\Mjml;
 
 use Symfony\Component\Process\Process;
+use function Safe\getcwd;
+use function shell_exec;
 
 class LocalProcessRenderer implements RendererInterface
 {
@@ -17,11 +21,11 @@ class LocalProcessRenderer implements RendererInterface
      */
     public function __construct(?array $command = null, ?string $cwd = null)
     {
-        if (null === $command) {
-            $command = [ shell_exec('which mjml') ];
+        if ($command === null) {
+            $command = [ (string) shell_exec('which mjml') ];
         }
 
-        if (null === $cwd) {
+        if ($cwd === null) {
             $cwd = getcwd() ?: __DIR__;
         }
 
@@ -29,9 +33,6 @@ class LocalProcessRenderer implements RendererInterface
         $this->cwd = $cwd;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function render(string $markup): string
     {
         $command = $this->command;
