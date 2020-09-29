@@ -66,7 +66,7 @@ class RendererFactory
         }
 
         $url = array_filter($match, static fn ($key) => ! is_numeric($key) && (bool) $match[$key], ARRAY_FILTER_USE_KEY);
-        parse_str(ltrim($url['querystring'], '?'), $qs);
+        parse_str(ltrim($url['querystring'] ?? '', '?'), $qs);
 
         switch ($url['scheme'] ?? 'local') {
             case 'local':
@@ -74,7 +74,7 @@ class RendererFactory
                     throw new InvalidConfigurationException('Local renderer needs symfony/process component to work correctly');
                 }
 
-                $path = ($url['hostname'] ?? '') . $url['path'] ?? '';
+                $path = ($url['hostname'] ?? '') . ($url['path'] ?? '');
                 $command = $qs['command'] ?? null;
 
                 return new LocalProcessRenderer($command ? [ $command ] : null, $path ?: getcwd());
@@ -88,6 +88,10 @@ class RendererFactory
             case 'lambda+http':
                 if ($this->lambdaClient === null) {
                     throw new InvalidConfigurationException('Lambda renderer needs aws sdk to be installed');
+                }
+
+                if (empty($url['host']) || empty($url['path'])) {
+                    throw new InvalidConfigurationException('Malformed lambda http url.');
                 }
 
                 return new LambdaHttpRenderer($this->lambdaClient, $url['host'], $url['path']);

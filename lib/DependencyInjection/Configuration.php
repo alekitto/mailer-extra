@@ -15,6 +15,8 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $root = new TreeBuilder('mailer_extra');
+
+        // @phpstan-ignore-next-line
         $root->getRootNode()
             ->addDefaultsIfNotSet()
             ->children()
@@ -25,6 +27,14 @@ class Configuration implements ConfigurationInterface
                     ->scalarNode('renderer')
                         ->cannotBeEmpty()
                         ->defaultValue('local://%kernel.project_dir%')
+                    ->end()
+                    ->arrayNode('aws_lambda_client_options')
+                        ->addDefaultsIfNotSet()
+                        ->ignoreExtraKeys()
+                        ->children()
+                            ->scalarNode('region')->defaultValue('us-west-1')->end()
+                            ->scalarNode('version')->defaultValue('2015-03-31')->end()
+                        ->end()
                     ->end()
                 ->end()
             ->end();
